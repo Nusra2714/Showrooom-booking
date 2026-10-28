@@ -1,0 +1,130 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  color: #202a36;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+.app-shell { min-height: 100vh; background: #f4f6f9; }
+
+.topbar {
+  min-height: 76px;
+  background: #fff;
+  border-bottom: 1px solid #e5e9ef;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 34px;
+}
+
+.brand { display: flex; align-items: center; gap: 12px; letter-spacing: .08em; }
+.brand-mark {
+  width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center;
+  background: #252d38; color: #fff; font-weight: 800; font-size: 20px;
+}
+.brand strong { display: block; font-size: 13px; }
+.brand span { display: block; color: #8b95a3; font-size: 9px; margin-top: 4px; }
+.topbar-right { display: flex; align-items: center; gap: 9px; color: #5d6877; font-size: 12px; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #21a67a; }
+
+.page-layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: calc(100vh - 76px); }
+.sidebar { background: #20252b; color: #fff; padding: 26px 14px; display: flex; flex-direction: column; }
+.sidebar-heading { color: #9da7b3; font-size: 10px; font-weight: 700; letter-spacing: .14em; padding: 0 12px 18px; }
+.room-nav {
+  width: 100%; border: 0; background: transparent; color: #dce1e7; padding: 13px 12px;
+  display: flex; justify-content: space-between; align-items: center; gap: 8px; text-align: left;
+  border-radius: 8px; cursor: pointer; font-size: 13px; margin-bottom: 5px;
+}
+.room-nav:hover, .room-nav.active { background: #333b45; color: #fff; }
+.status-pill { white-space: nowrap; font-size: 10px; font-weight: 700; padding: 5px 8px; border-radius: 20px; color: #147c5b; background: #e1f5ed; }
+.status-pill.busy { color: #b84b46; background: #fde9e7; }
+.sidebar .status-pill { font-size: 9px; padding: 4px 7px; }
+.sidebar .status-pill:not(.busy) { color: #a5e4cd; background: #29473f; }
+.sidebar .status-pill.busy { color: #ffc3bf; background: #593331; }
+.sidebar-summary { border-top: 1px solid #3a414a; margin-top: auto; padding: 20px 12px 0; display: flex; justify-content: space-between; color: #adb5bf; font-size: 12px; }
+.sidebar-summary strong { color: #fff; }
+
+.main-content { min-width: 0; padding: 32px clamp(18px, 3vw, 44px) 20px; }
+.page-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 25px; }
+.eyebrow { color: #6574a3; font-weight: 800; font-size: 10px; letter-spacing: .14em; margin: 0 0 8px; }
+h1 { font-size: clamp(23px, 2.2vw, 30px); letter-spacing: -.04em; margin: 0; color: #202a36; }
+.subtitle { color: #7b8795; font-size: 13px; margin: 8px 0 0; }
+.date-chip { padding: 10px 13px; background: #fff; border: 1px solid #e3e8ef; color: #596575; border-radius: 8px; font-size: 12px; white-space: nowrap; }
+
+.content-grid { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr); align-items: start; gap: 20px; }
+.panel { background: #fff; border: 1px solid #e6eaf0; border-radius: 13px; padding: 23px; box-shadow: 0 5px 20px rgba(28, 39, 54, .035); min-width: 0; }
+.panel-title { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 22px; }
+.step-number { flex: 0 0 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; background: #edf0fb; color: #5363a0; font-size: 12px; font-weight: 800; }
+.panel-title h2 { font-size: 16px; margin: 1px 0 5px; color: #27313e; }
+.panel-title p { font-size: 11px; color: #87919e; margin: 0; }
+.compact-title { margin-top: 2px; }
+
+.field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 17px; min-width: 0; }
+label { color: #4a5564; font-size: 12px; font-weight: 650; }
+label span { color: #d85d57; }
+input, select {
+  width: 100%; min-width: 0; height: 43px; border: 1px solid #dfe4eb; border-radius: 7px;
+  background: #fff; color: #27313e; padding: 0 12px; font: inherit; font-size: 12px; outline: none;
+}
+input::placeholder { color: #a5adb8; }
+input:focus, select:focus { border-color: #7584c1; box-shadow: 0 0 0 3px rgba(96, 112, 177, .12); }
+.two-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+.section-divider { border-top: 1px solid #edf0f4; margin: 8px 0 22px; }
+.field-hint { color: #bf514b; font-size: 11px; margin-top: 2px; }
+.primary-button {
+  width: 100%; min-height: 45px; border: 0; border-radius: 7px; background: #303b4c; color: #fff;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-size: 13px;
+  font-weight: 700; cursor: pointer; transition: background .15s;
+}
+.primary-button:hover:not(:disabled) { background: #465875; }
+.primary-button:disabled { opacity: .45; cursor: not-allowed; }
+.form-footnote { color: #939ca8; font-size: 10px; line-height: 1.5; margin: 12px 0 0; }
+.notice { padding: 11px 12px; border-radius: 7px; font-size: 12px; margin: 0 0 15px; display: flex; gap: 8px; align-items: flex-start; }
+.notice.success { color: #176e51; background: #eaf8f2; border: 1px solid #cdeee0; }
+.notice.error { color: #a73d38; background: #fff0ef; border: 1px solid #f5d5d2; }
+
+.availability-summary { display: flex; align-items: center; gap: 24px; background: #f7f8fb; border: 1px solid #edf0f5; padding: 15px 18px; border-radius: 9px; margin-bottom: 16px; }
+.availability-summary > div:not(.summary-divider) { display: flex; flex-direction: column; gap: 5px; }
+.summary-label { color: #929ba7; font-size: 9px; letter-spacing: .1em; font-weight: 800; }
+.availability-summary strong { font-size: 23px; color: #26313f; }
+.summary-divider { height: 37px; width: 1px; background: #e1e5ec; }
+.room-card { display: flex; align-items: center; gap: 12px; border: 1px solid #e6eaf0; border-radius: 9px; padding: 13px 11px; margin-bottom: 10px; min-width: 0; }
+.room-card.room-busy { background: #fffdfd; border-color: #f0dedd; }
+.room-icon { flex: 0 0 34px; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; background: #e3f6ee; color: #18835f; font-weight: 800; }
+.room-icon.busy-icon { background: #fde9e7; color: #b84b46; }
+.room-info { flex: 1; min-width: 0; }
+.room-name-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.room-name-row h3 { font-size: 12px; margin: 0; }
+.room-name-row .status-pill { font-size: 9px; padding: 3px 7px; }
+.room-description, .booking-customer { margin: 5px 0 0; font-size: 11px; color: #8993a0; overflow-wrap: anywhere; }
+.booking-customer { color: #596575; font-weight: 650; }
+.booking-meta { margin: 4px 0 0; font-size: 10px; color: #8993a0; overflow-wrap: anywhere; }
+.release-button { border: 1px solid #e0e5ec; border-radius: 6px; background: #fff; color: #4b596a; padding: 8px 10px; font-size: 10px; font-weight: 700; cursor: pointer; }
+.release-button:hover:not(:disabled) { border-color: #d58b86; color: #a73d38; background: #fff7f6; }
+.release-button:disabled { opacity: .35; cursor: not-allowed; }
+.help-note { display: flex; gap: 10px; padding: 14px; border-radius: 8px; background: #f5f7fb; margin-top: 17px; }
+.help-icon { flex: 0 0 19px; height: 19px; border-radius: 50%; background: #e0e6f6; color: #5363a0; display: grid; place-items: center; font-size: 11px; font-weight: 800; }
+.help-note p { margin: 0; color: #7a8593; font-size: 10px; line-height: 1.6; }
+.help-note strong { color: #485568; font-size: 11px; }
+.page-footer { display: flex; justify-content: space-between; gap: 12px; padding: 23px 2px 0; color: #a0a8b3; font-size: 9px; letter-spacing: .07em; }
+
+@media (max-width: 1050px) {
+  .content-grid { grid-template-columns: minmax(0, 1fr); }
+  .rooms-panel { order: 2; }
+}
+@media (max-width: 680px) {
+  .topbar { padding: 0 17px; min-height: 66px; }
+  .topbar-right { font-size: 10px; }
+  .page-layout { grid-template-columns: 1fr; }
+  .sidebar { padding: 13px; }
+  .sidebar-heading { padding-bottom: 10px; }
+  .room-nav { display: inline-flex; width: calc(50% - 4px); vertical-align: top; margin-right: 4px; padding: 10px 8px; font-size: 11px; }
+  .sidebar-summary { margin-top: 8px; padding-top: 12px; }
+  .main-content { padding: 22px 13px; }
+  .page-heading { align-items: flex-start; }
+  .date-chip { display: none; }
+  .panel { padding: 17px; }
+  .two-columns { grid-template-columns: minmax(0, 1fr); gap: 0; }
+}
