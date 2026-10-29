@@ -27,7 +27,7 @@ export interface RoomStatus {
   providedIn: 'root'
 })
 export class BookingService {
-  private readonly apiUrl = 'http://localhost:8080/api';
+  private readonly apiUrl = 'https://showroom-booking-backend.onrender.com/api';
 
   constructor(private http: HttpClient) {}
 
