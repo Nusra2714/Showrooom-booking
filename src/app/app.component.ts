@@ -1,10 +1,12 @@
+
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { BookingService, Booking as ApiBooking } from './services/booking.service';
 
 type RoomStatus = 'Available' | 'Busy';
 
-interface Booking {
+interface RoomBooking {
   customerName: string;
   mobile: string;
   email: string;
@@ -18,7 +20,7 @@ interface Booking {
 interface Room {
   name: string;
   status: RoomStatus;
-  booking: Booking | null;
+  booking: RoomBooking | null;
 }
 
 @Component({
@@ -49,6 +51,11 @@ export class AppComponent implements OnInit {
   rooms: Room[] = this.makeEmptyRooms();
   notice = '';
   noticeType: 'success' | 'error' = 'success';
+  loadingRooms = false;
+  submitting = false;
+  releasingRoomNumber: number | null = null;
+
+  constructor(private bookingService: BookingService) {}
 
   ngOnInit(): void {
     this.loadRooms();
@@ -65,9 +72,15 @@ export class AppComponent implements OnInit {
   bookRoom(): void {
     this.notice = '';
 
-    if (!this.customerName.trim() || !this.mobile.trim() ||
-        !this.email.trim() || !this.bookingDate ||
-        !this.bookingTime || !this.selectedModel || !this.selectedRoom) {
+    if (
+      !this.customerName.trim() ||
+      !this.mobile.trim() ||
+      !this.email.trim() ||
+      !this.bookingDate ||
+      !this.bookingTime ||
+      !this.selectedModel ||
+      !this.selectedRoom
+    ) {
       this.showNotice('Please complete all fields before booking.', 'error');
       return;
     }
@@ -83,46 +96,145 @@ export class AppComponent implements OnInit {
     }
 
     const room = this.rooms.find(item => item.name === this.selectedRoom);
+
     if (!room || room.status === 'Busy') {
-      this.showNotice('That room is busy. Please select an available room.', 'error');
-      this.selectedRoom = '';
+      this.showNotice(
+        'That room is busy. Please refresh room availability and select another room.',
+        'error'
+      );
+      this.loadRooms();
       return;
     }
 
-    const booking: Booking = {
+    const roomNumber = Number(room.name.replace('Room ', ''));
+
+    this.submitting = true;
+
+    this.bookingService.createBooking({
+      roomNumber,
       customerName: this.customerName.trim(),
       mobile: this.mobile.trim(),
       email: this.email.trim(),
-      date: this.bookingDate,
-      time: this.bookingTime,
       model: this.selectedModel,
-      room: this.selectedRoom,
-      bookedAt: new Date().toISOString()
-    };
+      date: this.bookingDate,
+      time: this.bookingTime
+    }).subscribe({
+      next: (booking: ApiBooking) => {
+        this.submitting = false;
+        this.showNotice(
+          `${room.name} booked successfully for ${booking.customerName}.`,
+          'success'
+        );
+        this.resetCustomerForm();
+        this.loadRooms();
+      },
+      error: (error) => {
+        this.submitting = false;
 
-    room.status = 'Busy';
-    room.booking = booking;
-    this.saveRooms();
-    this.showNotice(`${room.name} booked successfully for ${booking.customerName}.`, 'success');
-    this.resetCustomerForm();
+        if (error.status === 409) {
+          this.showNotice(
+            'This room has already been booked. Refreshing room availability.',
+            'error'
+          );
+        } else {
+          this.showNotice(
+            'Could not save the booking. Check that the backend is running and try again.',
+            'error'
+          );
+        }
+
+        this.loadRooms();
+      }
+    });
   }
 
   releaseRoom(room: Room): void {
     if (room.status !== 'Busy') return;
 
-    room.status = 'Available';
-    room.booking = null;
-    this.saveRooms();
-    this.showNotice(`${room.name} has been released and is now available.`, 'success');
-    if (!this.selectedRoom) this.selectedRoom = room.name;
+    const roomNumber = Number(room.name.replace('Room ', ''));
+    this.notice = '';
+    this.releasingRoomNumber = roomNumber;
+
+    this.bookingService.releaseRoom(roomNumber).subscribe({
+      next: () => {
+        this.releasingRoomNumber = null;
+        this.showNotice(
+          `${room.name} has been released and is now available.`,
+          'success'
+        );
+
+        if (this.selectedRoom === room.name) {
+          this.selectedRoom = '';
+        }
+
+        this.loadRooms();
+      },
+      error: (error) => {
+        this.releasingRoomNumber = null;
+
+        this.showNotice(
+          error.status === 404
+            ? 'This room is already available. Refreshing room availability.'
+            : 'Could not release the room. Please check the backend and try again.',
+          'error'
+        );
+
+        this.loadRooms();
+      }
+    });
   }
 
   selectRoom(room: Room): void {
-    if (room.status === 'Available') this.selectedRoom = room.name;
+    if (room.status === 'Available') {
+      this.selectedRoom = room.name;
+    }
   }
 
   trackByRoom(_index: number, room: Room): string {
     return room.name;
+  }
+
+  private loadRooms(): void {
+    this.loadingRooms = true;
+
+    this.bookingService.getRooms().subscribe({
+      next: (apiRooms) => {
+        this.rooms = apiRooms.map(apiRoom => ({
+          name: `Room ${apiRoom.roomNumber}`,
+          status: apiRoom.status === 'BUSY' ? 'Busy' : 'Available',
+          booking: apiRoom.booking
+            ? {
+                customerName: apiRoom.booking.customerName,
+                mobile: apiRoom.booking.mobile,
+                email: apiRoom.booking.email,
+                date: apiRoom.booking.date,
+                time: apiRoom.booking.time,
+                model: apiRoom.booking.model,
+                room: `Room ${apiRoom.roomNumber}`,
+                bookedAt: apiRoom.booking.createdAt ?? ''
+              }
+            : null
+        }));
+
+        if (
+          this.selectedRoom &&
+          !this.rooms.some(
+            room => room.name === this.selectedRoom && room.status === 'Available'
+          )
+        ) {
+          this.selectedRoom = '';
+        }
+
+        this.loadingRooms = false;
+      },
+      error: () => {
+        this.loadingRooms = false;
+        this.showNotice(
+          'Could not load room availability. Make sure the backend is running.',
+          'error'
+        );
+      }
+    });
   }
 
   private resetCustomerForm(): void {
@@ -140,7 +252,9 @@ export class AppComponent implements OnInit {
 
   private getToday(): string {
     const now = new Date();
-    const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+    const local = new Date(
+      now.getTime() - now.getTimezoneOffset() * 60000
+    );
     return local.toISOString().slice(0, 10);
   }
 
@@ -150,31 +264,5 @@ export class AppComponent implements OnInit {
       status: 'Available' as RoomStatus,
       booking: null
     }));
-  }
-
-  private loadRooms(): void {
-    try {
-      const saved = localStorage.getItem('pixcom-showroom-rooms');
-      if (!saved) return;
-
-      const parsed = JSON.parse(saved) as Room[];
-      const expectedNames = ['Room 1', 'Room 2', 'Room 3', 'Room 4'];
-      if (Array.isArray(parsed) && expectedNames.every(name => parsed.some(r => r.name === name))) {
-        this.rooms = expectedNames.map(name => {
-          const savedRoom = parsed.find(r => r.name === name)!;
-          return {
-            name,
-            status: savedRoom.status === 'Busy' && savedRoom.booking ? 'Busy' : 'Available',
-            booking: savedRoom.status === 'Busy' && savedRoom.booking ? savedRoom.booking : null
-          };
-        });
-      }
-    } catch {
-      this.rooms = this.makeEmptyRooms();
-    }
-  }
-
-  private saveRooms(): void {
-    localStorage.setItem('pixcom-showroom-rooms', JSON.stringify(this.rooms));
   }
 }

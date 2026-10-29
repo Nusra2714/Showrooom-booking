@@ -1,3 +1,4 @@
+
 <div class="app-shell">
   <header class="topbar">
     <div class="brand">
@@ -16,6 +17,7 @@
   <div class="page-layout">
     <aside class="sidebar">
       <div class="sidebar-heading">ROOM STATUS</div>
+
       <button
         type="button"
         class="room-nav"
@@ -27,6 +29,7 @@
           {{ room.status }}
         </span>
       </button>
+
       <div class="sidebar-summary">
         <span>Busy rooms</span>
         <strong>{{ busyCount }} / {{ rooms.length }}</strong>
@@ -38,7 +41,9 @@
         <div>
           <p class="eyebrow">BOOKING MANAGEMENT</p>
           <h1>New showroom booking</h1>
-          <p class="subtitle">Enter customer details and reserve an available room.</p>
+          <p class="subtitle">
+            Enter customer details and reserve an available room.
+          </p>
         </div>
         <div class="date-chip">{{ bookingDate || 'Select a date' }}</div>
       </div>
@@ -55,21 +60,40 @@
 
           <form (ngSubmit)="bookRoom()" #bookingForm="ngForm">
             <div class="field">
-              <label for="customerName">Customer name <span>*</span></label>
-              <input id="customerName" name="customerName" [(ngModel)]="customerName"
-                placeholder="e.g. Alex Johnson" autocomplete="name" required />
+              <label for="customerName">
+                Customer name <span>*</span>
+              </label>
+              <input
+                id="customerName"
+                name="customerName"
+                [(ngModel)]="customerName"
+                placeholder="e.g. Alex Johnson"
+                autocomplete="name"
+                required />
             </div>
 
             <div class="two-columns">
               <div class="field">
                 <label for="mobile">Mobile number <span>*</span></label>
-                <input id="mobile" name="mobile" [(ngModel)]="mobile"
-                  placeholder="+91 98765 43210" autocomplete="tel" required />
+                <input
+                  id="mobile"
+                  name="mobile"
+                  [(ngModel)]="mobile"
+                  placeholder="+91 98765 43210"
+                  autocomplete="tel"
+                  required />
               </div>
+
               <div class="field">
                 <label for="email">Email ID <span>*</span></label>
-                <input id="email" name="email" [(ngModel)]="email" type="email"
-                  placeholder="name@example.com" autocomplete="email" required />
+                <input
+                  id="email"
+                  name="email"
+                  [(ngModel)]="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  autocomplete="email"
+                  required />
               </div>
             </div>
 
@@ -86,47 +110,86 @@
             <div class="two-columns">
               <div class="field">
                 <label for="bookingDate">Booking date <span>*</span></label>
-                <input id="bookingDate" name="bookingDate" [(ngModel)]="bookingDate"
-                  type="date" required />
+                <input
+                  id="bookingDate"
+                  name="bookingDate"
+                  [(ngModel)]="bookingDate"
+                  type="date"
+                  required />
               </div>
+
               <div class="field">
                 <label for="bookingTime">Booking time <span>*</span></label>
-                <input id="bookingTime" name="bookingTime" [(ngModel)]="bookingTime"
-                  type="time" required />
+                <input
+                  id="bookingTime"
+                  name="bookingTime"
+                  [(ngModel)]="bookingTime"
+                  type="time"
+                  required />
               </div>
             </div>
 
             <div class="field">
               <label for="model">Vehicle model <span>*</span></label>
-              <select id="model" name="model" [(ngModel)]="selectedModel" required>
+              <select
+                id="model"
+                name="model"
+                [(ngModel)]="selectedModel"
+                required>
                 <option value="" disabled>Select a model</option>
-                <option *ngFor="let model of models" [value]="model">{{ model }}</option>
+                <option *ngFor="let model of models" [value]="model">
+                  {{ model }}
+                </option>
               </select>
             </div>
 
             <div class="field">
               <label for="room">Room <span>*</span></label>
-              <select id="room" name="room" [(ngModel)]="selectedRoom" required>
+              <select
+                id="room"
+                name="room"
+                [(ngModel)]="selectedRoom"
+                required>
                 <option value="" disabled>Select an available room</option>
-                <option *ngFor="let room of availableRooms" [value]="room.name">
+                <option
+                  *ngFor="let room of availableRooms"
+                  [value]="room.name">
                   {{ room.name }} — Available
                 </option>
               </select>
-              <small class="field-hint" *ngIf="availableRooms.length === 0">
+
+              <small class="field-hint" *ngIf="loadingRooms">
+                Loading room availability...
+              </small>
+
+              <small
+                class="field-hint"
+                *ngIf="!loadingRooms && availableRooms.length === 0">
                 All rooms are busy. Release a room before making another booking.
               </small>
             </div>
 
-            <div class="notice" *ngIf="notice" [class.error]="noticeType === 'error'"
-              [class.success]="noticeType === 'success'" role="status">
+            <div
+              class="notice"
+              *ngIf="notice"
+              [class.error]="noticeType === 'error'"
+              [class.success]="noticeType === 'success'"
+              role="status">
               <span>{{ noticeType === 'success' ? '✓' : '!' }}</span>
               {{ notice }}
             </div>
 
-            <button class="primary-button" type="submit" [disabled]="availableRooms.length === 0">
-              Book room <span aria-hidden="true">→</span>
+            <button
+              class="primary-button"
+              type="submit"
+              [disabled]="availableRooms.length === 0 || submitting || loadingRooms">
+              {{ submitting ? 'Booking...' : 'Book room' }}
+              <span aria-hidden="true">→</span>
             </button>
-            <p class="form-footnote">* Required fields. A room remains busy until it is explicitly released.</p>
+
+            <p class="form-footnote">
+              * Required fields. A room remains busy until it is explicitly released.
+            </p>
           </form>
         </section>
 
@@ -151,35 +214,56 @@
             </div>
           </div>
 
-          <div class="room-card" *ngFor="let room of rooms; trackBy: trackByRoom"
+          <div
+            class="room-card"
+            *ngFor="let room of rooms; trackBy: trackByRoom"
             [class.room-busy]="room.status === 'Busy'">
+
             <div class="room-icon" [class.busy-icon]="room.status === 'Busy'">
               <span>{{ room.status === 'Busy' ? '!' : '✓' }}</span>
             </div>
+
             <div class="room-info">
               <div class="room-name-row">
                 <h3>{{ room.name }}</h3>
-                <span class="status-pill" [class.busy]="room.status === 'Busy'">
+                <span
+                  class="status-pill"
+                  [class.busy]="room.status === 'Busy'">
                   {{ room.status }}
                 </span>
               </div>
+
               <ng-container *ngIf="room.booking; else emptyRoom">
-                <p class="booking-customer">{{ room.booking.customerName }}</p>
-                <p class="booking-meta">{{ room.booking.model }} · {{ room.booking.date }} at {{ room.booking.time }}</p>
+                <p class="booking-customer">
+                  {{ room.booking.customerName }}
+                </p>
+                <p class="booking-meta">
+                  {{ room.booking.model }} ·
+                  {{ room.booking.date }} at {{ room.booking.time }}
+                </p>
               </ng-container>
+
               <ng-template #emptyRoom>
                 <p class="room-description">Ready for a new booking</p>
               </ng-template>
             </div>
-            <button type="button" class="release-button"
-              [disabled]="room.status !== 'Busy'" (click)="releaseRoom(room)">
-              Release
+
+            <button
+              type="button"
+              class="release-button"
+              [disabled]="room.status !== 'Busy' || releasingRoomNumber === +room.name.replace('Room ', '')"
+              (click)="releaseRoom(room)">
+              {{ releasingRoomNumber === +room.name.replace('Room ', '') ? 'Releasing...' : 'Release' }}
             </button>
           </div>
 
           <div class="help-note">
             <span class="help-icon">i</span>
-            <p><strong>Room control</strong><br />Busy rooms cannot be selected for another booking. Use Release when the session is finished.</p>
+            <p>
+              <strong>Room control</strong><br />
+              Busy rooms cannot be selected for another booking. Use Release
+              when the session is finished.
+            </p>
           </div>
         </section>
       </div>
